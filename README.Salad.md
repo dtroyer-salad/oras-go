@@ -21,6 +21,35 @@ for `oras-go`.
     * The Annotations field of the Descriptor is used to pass state around during the request handling.  This avoids changing the public API via interfaces or structs.
     * Salad-specific keys are defined in `internal/spec/artifact.go` using constants with names beginning with `AnnotationResume`.
 
+* `remote.FetcherHead` (`registry/remote/repository.go`)
+  * interface defining `FetchHead()`
+
+* `remote.BlobStoreHead` (`registry/remote/repository.go`)
+  * interface combining `registry.BlobStore` with `FetcherHead`
+
+* `remote.Repository.FetchHead()` (new) (`registry/remote/repository.go`)
+  * call `FetchHead()` when `BlobStoreHead` is implemented
+
+* `remote.blobStore` (`registry/remote/repository.go`)
+  * `blobStore.Fetch()`
+    * call `FetchHead()` to check for the `Range` header support from the server
+      * FALSE:
+        * reset resume flag and proceed as usual
+      * TRUE:
+        * Set `Range` header
+    * after GET request to remote repository if in resume
+      * `StatusPartialContent`:
+        * check response `ContentLength` against `target.Size - ingestSize`
+      * `StatusOK`:
+        * check response `ContentLength` against `target.Size`
+  * `blobStore.FetchHead()` (new)
+    * do HEAD call to src
+      * `StatusOK`:
+        * check response `ContentLength` against `target.Size`
+        * check response header `Accept-Ranges` has value `bytes`
+          * TRUE:
+            * Set resume flag
+
 * `content.Storage.Push()` (`content/oci/storage.go`)
   * call `Storage.ingest()` as usual
 
