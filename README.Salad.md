@@ -8,11 +8,33 @@ is a high one to pay in the Salad network especially when some of these layers m
 performant distributed compute node with limited bandwidth.
 
 This repository is a fork of https://github.com/oras-project/oras-go/ just after the v2.5.0
-tag.  The branch `resume` contains Salad's download changes.  The only changes required to
-build the ORAS CLI (`oras`) (https://github.com/oras-project/oras) are to use this replacement
+tag.  The [`oras-main`](https://github.com/saladtechnologies/oras-go/tree/oras-main) contains
+the upstream [`main`](https://github.com/oras-project/oras-go/tree/main) branch while
+[`main`](https://github.com/saladtechnologies/oras-go/tree/main) contains
+Salad's download changes.  The only changes required to build the ORAS CLI (`oras`)
+(https://github.com/oras-project/oras) are to use this replacement
 for `oras-go`.
 
+Typically the only change required is a `replace` line in `go.mod`, setting the
+psuedo-version to the desired commit:
+
+```
+replace oras.land/oras-go/v2 v2.5.0 => github.com/saladtechnologies/oras-go/v2 v2.0.0-20240409062726-11d464f8432e
+```
+
 ## Summary
+
+### Resumable Downloads
+
+This resumable download implementation is contained entirely within `oras-go` and the code path
+below `oras.doCopyNode()`.  Attempts have been made to not alter the existing external interfaces
+although some new ones have been added.  Resume download is always enabled but conditions are
+carefully evaluated and falls back to the original code path when not possible. This
+implementation does not include any way to force resume enabled (fail if not possible) or
+disabled (do not attempt even when possible).
+
+Resumable downloads are limited to remote registry source targets and local storage destination
+targets.  This is the use case for prepping containerd images.
 
 ### Changes
 
@@ -20,6 +42,11 @@ for `oras-go`.
   * AnnotationResume* - the keys used in the Annotations[] map
     * The Annotations field of the Descriptor is used to pass state around during the request handling.  This avoids changing the public API via interfaces or structs.
     * Salad-specific keys are defined in `internal/spec/artifact.go` using constants with names beginning with `AnnotationResume`.
+
+* `oras.doCopyNode()` (`copy.go`)
+  * Look for files in the ingest directory that match the current `Descriptor` being downloaded
+    * if found: save full filename and file size to the `Annotations` map for the `Descriptor`
+    * if not found: nothing to see here, proceed as normal
 
 * `remote.FetcherHead` (`registry/remote/repository.go`)
   * interface defining `FetchHead()`
