@@ -66,6 +66,10 @@ for `oras-go`.
     * TRUE:
       * call `ioutil.CopyBuffer()` as usual
 
+* `ioutil.CopyBuffer()` (`internal/ioutil.io.go`)
+  * call `content.NewVerifyReader()` as usual
+  * handle `io.ErrUnexpectedEOF`: check `bytes read == desc.Size - ingestSize`
+
 * `content.NewVerifyReader()` (`content/reader.go`)
   * Add `resume` field to `VerifyReader` struct
   * if `Annotations[offset]` > 0
