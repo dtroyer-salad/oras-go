@@ -21,6 +21,22 @@ for `oras-go`.
     * The Annotations field of the Descriptor is used to pass state around during the request handling.  This avoids changing the public API via interfaces or structs.
     * Salad-specific keys are defined in `internal/spec/artifact.go` using constants with names beginning with `AnnotationResume`.
 
+* `content.Storage.Push()` (`content/oci/storage.go`)
+  * call `Storage.ingest()` as usual
+
+* `content.Storage.ingest()` (`content/oci/storage.go`)
+  * if resume conditions are all met
+    * TRUE:
+      * open existing ingest file
+      * seek to 0 in ingest file
+      * create a new Hash to contain the current hash of the ingest file
+      * save encoded Hash to `Annotations[hash]`
+    * FALSE:
+      * if not found: `CreateTemp()` a new ingest file as usual
+  * if `0 <= ingest size < content-length`
+    * TRUE:
+      * call `ioutil.CopyBuffer()` as usual
+
 * `content.NewVerifyReader()` (`content/reader.go`)
   * Add `resume` field to `VerifyReader` struct
   * if `Annotations[offset]` > 0
@@ -33,3 +49,12 @@ for `oras-go`.
 * `content.hashVerifier` (new) (`content/verifiers.go`)
   * `digest.hashVerifier` is copied here from `opencontainers/go-digest/blob/master/verifiers.go`
     because it is private and we need to construct a verifier with our new `Hash` and the original `Digest`.
+
+* `content.Resumer` (new) (`content.storage.go`)
+  * Interface to get ingest filenames, also used to determine support for resumable downloads
+
+* `content.Store.IngestFile()` (new) (`content/oci/storage.go`)
+  * Provide access to `content.Store.storage.IngestFile()`
+
+* `content.Storage.IngestFile()` (new) (`content/oci/storage.go`)
+  * Locate and return the first matching ingest file, if any
