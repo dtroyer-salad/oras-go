@@ -22,6 +22,25 @@ import (
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
+const (
+	// The AnnotationResume* constants define the keys used in resumable downloads
+	// in the ocispec.Descriptior.Annotations map for passing resume state around.
+
+	// AnnotationResumeDownload is "true" when a resumable is being attempted.
+	AnnotationResumeDownload = "com.salad.image.resume"
+
+	// AnnotationResumeFilename contains the full ingest filename.
+	AnnotationResumeFilename = "com.salad.image.resume.filename"
+
+	// AnnotationResumeHash contains a hash.Hash of the existing ingest file
+	// suitable for using in the new Verifier to resume download verification.
+	AnnotationResumeHash = "com.salad.image.resume.hash"
+
+	// AnnotationResumeOffset contains the offset to resume downloading, aka
+	// the size of the existing ingest file.
+	AnnotationResumeOffset = "com.salad.image.resume.offset"
+)
+
 // Fetcher fetches content.
 type Fetcher interface {
 	// Fetch fetches the content identified by the descriptor.
