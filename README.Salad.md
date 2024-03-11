@@ -21,6 +21,15 @@ for `oras-go`.
     * The Annotations field of the Descriptor is used to pass state around during the request handling.  This avoids changing the public API via interfaces or structs.
     * Salad-specific keys are defined in `internal/spec/artifact.go` using constants with names beginning with `AnnotationResume`.
 
+* `content.NewVerifyReader()` (`content/reader.go`)
+  * Add `resume` field to `VerifyReader` struct
+  * if `Annotations[offset]` > 0
+    * TRUE:
+      * decode `Annotations[Hash]`
+      * create a new `content.hashVerifier` with the new `Hash` and the original `desc.Digest`
+    * FALSE:
+      * create a new `digest.hashVerifier` from `desc.Digest`
+
 * `content.hashVerifier` (new) (`content/verifiers.go`)
   * `digest.hashVerifier` is copied here from `opencontainers/go-digest/blob/master/verifiers.go`
     because it is private and we need to construct a verifier with our new `Hash` and the original `Digest`.
