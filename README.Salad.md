@@ -20,3 +20,7 @@ for `oras-go`.
   * AnnotationResume* - the keys used in the Annotations[] map
     * The Annotations field of the Descriptor is used to pass state around during the request handling.  This avoids changing the public API via interfaces or structs.
     * Salad-specific keys are defined in `internal/spec/artifact.go` using constants with names beginning with `AnnotationResume`.
+
+* `content.hashVerifier` (new) (`content/verifiers.go`)
+  * `digest.hashVerifier` is copied here from `opencontainers/go-digest/blob/master/verifiers.go`
+    because it is private and we need to construct a verifier with our new `Hash` and the original `Digest`.
