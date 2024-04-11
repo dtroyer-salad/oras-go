@@ -274,6 +274,21 @@ func copyGraph(ctx context.Context, src content.ReadOnlyStorage, dst content.Sto
 	return syncutil.Go(ctx, limiter, fn, root)
 }
 
+// Quick way to get all of the blobs associated with an image
+func GetSuccessors(ctx context.Context, src ReadOnlyTarget, desc ocispec.Descriptor) ([]ocispec.Descriptor, error) {
+	proxy := cas.NewProxyWithLimit(src, cas.NewMemory(), defaultCopyMaxMetadataBytes)
+	successors, err := content.Successors(ctx, proxy, desc)
+	if err != nil {
+		return nil, err
+	}
+	// if len(successors) != 0 {
+	// 	for _, node := range successors {
+	// 		fmt.Printf("  names: %\n", node.Digest)
+	// 	}
+	// }
+	return successors, nil
+}
+
 // mountOrCopyNode tries to mount the node, if not falls back to copying.
 func mountOrCopyNode(ctx context.Context, src content.ReadOnlyStorage, dst content.Storage, desc ocispec.Descriptor, opts CopyGraphOptions) error {
 	// Need MountFrom and it must be a blob
