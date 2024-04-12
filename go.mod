@@ -1,4 +1,4 @@
-module oras.land/oras-go/v2
+module github.com/dtroyer-salad/oras-go/v2
 
 go 1.21
 
