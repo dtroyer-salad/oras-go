@@ -1,6 +1,9 @@
-module github.com/dtroyer-salad/oras-go/v2
+// module github.com/dtroyer-salad/oras-go/v2
+module oras.land/oras-go/v2
 
 go 1.21
+
+replace oras.land/oras-go/v2 v2.0.0 => github.com/dtroyer-salad/oras-go/v2 v2.0.0
 
 require (
 	github.com/opencontainers/go-digest v1.0.0
